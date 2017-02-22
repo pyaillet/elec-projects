@@ -14,12 +14,13 @@ async function test() {
   console.log(result);
   let comp = {
     type: "RESISTANCE",
+    model: "",
     value: "1000",
     unit: "OHM"
   };
-  // let compNew = await componentRepository.update(comp);
+  let compNew = await componentRepository.update(comp);
   // console.log(compNew);
-  await componentRepository.purge();
+  // await componentRepository.purge();
 }
 
 Promise.resolve()

@@ -7,78 +7,81 @@ export default class ComponentRepository {
     this.db = db;
   }
 
+  listTypes() {
+    return this.db.all(`
+      SELECT c.type
+      FROM component c
+      GROUP BY c.type
+    `)
+    .catch(err => console.log("Error:",err))
+  }
+
   findByModel({model}) {
-    return this.db.prepare(`
+    return this.db.all(`
       SELECT c.*, s.stock
       FROM component c
         LEFT JOIN stock s
         ON c.component_id = s.component_id
       WHERE c.model like ?
-    `)
-    .then(stmt => stmt.all())
+    `, {1: model})
     .catch(err => console.log("Error:",err))
   }
 
   findByTypeAndModel({type, model}) {
-    return this.db.prepare(`
+    return this.db.all(`
       SELECT c.*, s.stock
       FROM component c
         LEFT JOIN stock s
         ON c.component_id = s.component_id
       WHERE c.type like '?%'
         AND c.model like ?
-    `)
-    .then(stmt => stmt.all())
+    `, {1: type, 2: model})
     .catch(err => console.log("Error:",err))
   }
 
-  findByType({type}) {
-    return this.db.prepare(`
+  findByType(type) {
+    return this.db.all(`
       SELECT c.*, s.stock
       FROM component c
         LEFT JOIN stock s
         ON c.component_id = s.component_id
-      WHERE c.type like '?%'
-      `)
-      .then(stmt => stmt.all())
-      .catch(err => console.log("Error:",err))
+      WHERE c.type like $type
+    `, {$type:type+'%'})
+    .catch(err => console.log("Error:",err))
   }
 
   findByTypeAndValue({name, value}) {
-    return this.db.prepare(`
+    return this.db.all(`
       SELECT c.*, s.stock
       FROM component c
         LEFT JOIN stock s
         ON c.component_id = s.component_id
       WHERE c.type like '?%'
         AND c.value = ?
-      `)
-      .then(stmt => stmt.all())
-      .catch(err => console.log("Error:",err))
+    `,{1: type, 2: value})
+    .catch(err => console.log("Error:",err))
   }
 
   findById(id) {
-    return this.db.prepare(`
+    return this.db.get(`
       SELECT c.*, s.stock
       FROM component c
         LEFT JOIN stock s
         ON c.component_id = s.component_id
       WHERE
         c.component_id = ?
-      `)
-      .then(stmt => stmt.get({1: id}))
-      .catch(err => console.log("Error:",err));
+    `, {1: id})
+    .catch(err => console.log("Error:",err));
   }
 
   findAll() {
-    return this.db.prepare(`
+    return this.db.all(`
       SELECT c.*, s.stock
       FROM component c
         LEFT JOIN stock s
         ON c.component_id = s.component_id
-      `)
-      .then(stmt => stmt.all())
-      .catch(err => console.log("Error:",err));
+    `)
+    .catch(err => console.log("Error:",err));
   }
 
   update(component) {
@@ -94,29 +97,33 @@ export default class ComponentRepository {
     return this.db.run(`
       UPDATE component SET
         type = ?,
+        model = ?,
         value = ?,
         unit = ?
       WHERE component_id = ?
       `, {
         1: component.type,
-        2: component.value,
-        3: component.unit,
-        4: component.component_id
+        2: component.model,
+        3: component.value,
+        4: component.unit,
+        5: component.component_id
       })
-      .catch(err => console.log("Error updating:", err));
+    .catch(err => console.log("Error updating:", err));
   }
 
   _insert(component) {
     return this.db.run(`
       INSERT INTO component (
         type,
+        model,
         value,
         unit)
-      VALUES (?, ?, ?);
+      VALUES (?, ?, ?, ?);
       `, {
         1: component.type,
-        2: component.value,
-        3: component.unit,
+        2: component.model,
+        3: component.value,
+        4: component.unit,
       })
       .then(() => db.get("SELECT last_insert_rowid() as id;"))
       .then((row) => ({
