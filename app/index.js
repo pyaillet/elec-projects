@@ -5,11 +5,12 @@ import db from 'sqlite';
 import ComponentRepository from './repositories/component-repository';
 
 function componentToString(obj) {
-  let str = "";
+  let str = obj.component_id+" :\t";
   if (obj.type) str += obj.type;
   if (obj.model) str += " " + obj.model;
   if (obj.value) str += " " + obj.value;
   if (obj.unit) str+= " " + obj.unit;
+  if (obj.stock) str += "\tstock: " + obj.stock;
   return str;
 }
 
@@ -80,6 +81,13 @@ function myShell(db) {
         }
         res.prompt();
       });
+  });
+  app.cmd('comp setstock :id :stock', 'Set stock of a component', function(req, res, next) {
+    componentRepository.setStock(req.params)
+      .then(() => {
+        res.green("Stock updated\n");
+        res.prompt();
+      })
   });
 }
 
