@@ -89,9 +89,7 @@ export default class ComponentRepository {
       SELECT stock.rowid FROM stock WHERE component_id = $id
       `, {$id:id})
     .then((row) => {
-      console.log(row)
       if (row) {
-        console.log("update");
         return this.db.run(`
           UPDATE stock
             SET stock = $stock
@@ -100,7 +98,6 @@ export default class ComponentRepository {
         .catch(err => console.log("Error:",err));
       }
       else {
-        console.log("insert");
         return this.db.run(`
           INSERT INTO stock (component_id, stock)
           VALUES ($id, $stock)

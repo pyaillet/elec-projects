@@ -10,12 +10,14 @@ function init(mainDb) {
       model TEXT,
       value REAL,
       unit TEXT,
+      subtype TEXT,
       datasheet_link TEXT,
       code TEXT,
       other TEXT)`));
   db.run(`DROP TABLE IF EXISTS project`)
     .then(() => db.run(`CREATE TABLE project(
       project_id INTEGER PRIMARY KEY ASC,
+      title TEXT,
       link TEXT,
       description TEXT,
       status REAL)`));

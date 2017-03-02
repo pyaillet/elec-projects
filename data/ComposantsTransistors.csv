@@ -1,0 +1,16 @@
+Composant,Nombre,Type,Hfe_2ma,Hfe_100mA,Vce,Ic,Pd,fT,Comment
+BC557C,10,PNP,500,300,-45V,-100mA,625 mW/1.5 W,320 MHz,Amplifier - Silicon
+BC238B,5,NPN,290,180,25V,100mA,350 mW/1 W,120 MHz,Amplifier - Silicon
+BC327-16,5,PNP,,100-250,-45V,-800mA,625 mW,100 MHz,Switching/Amplifier - Silicon
+BC546B,10,NPN,290,180,65V,100mA,625 mW/1.5 W,300 MHz,Amplifier - Silicon
+BC328-16?,10,PNP,,160,-25V,-800mA,625 mW,100 MHz,Amplifier - Silicon
+BC558B,10,PNP,290,180,-30V,-100mA,625 mW/1.5 W,320 MHz,Amplifier - Silicon
+BC337-40,10,NPN,,250-600,45V,500mA,625 mW/1.5 W,100 MHz,Small signal
+BC548E,10,NPN,75-800,,30V,100mA,500mW,300 MHz,General Amplifier - Silicon
+BC558C,10,PNP,600,,30V,100mA,500mW,150 MHz,Switching/Amplifier - Silicon
+BC237B,5,NPN,200-460,,45V,100mA,350 mW/1 W,100 MHz,Amplifier - Silicon
+BC418,5,PNP,75,,25V,100mA,500mW,75 MHz,Audio - Silicon
+BC237A,5,NPN,170,120,45V,100mA,350 mW/1 W,100 MHz,Amplifier - Silicon
+BC307C,5,PNP,500,300,-45V,-100mA,350 mW/1 W,280 MHz,Amplifier - Silicon
+BC549C,4,NPN,500,,30V,100mA,625 mW/1 W,250 MHz,Low noise - Silicon
+2N2222,8,NPN,,300,30V,600mA,625 mW,300 MHz,Switching - Silicon
