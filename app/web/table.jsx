@@ -5,14 +5,39 @@ import ReactBsTable from 'react-bootstrap-table';
 // import findAll from '../facades/component-facade';
 import jsonFetch from 'json-fetch';
 import math from 'mathjs';
+import request from 'superagent';
+import json from 'json5';
+
+let urlServer = 'http://localhost:3000';
 
 function findAll() {
-  return jsonFetch('http://localhost:3000/components', {
+  return jsonFetch(urlServer+'/components', {
     method: 'GET',
     credentials: 'omit', // "include" by default, be careful!
     // mode: 'no-cors',
   });
 }
+
+function onAfterSaveCell(row, cellName, cellValue) {
+  return request.post(urlServer+'/component')
+    .send({ component: row })
+    .set('Content-Type', 'application/json')
+    .end((err, res) => {
+      console.log(err);
+      console.log(res);
+    });
+}
+
+function onBeforeSaveCell(row, cellName, cellValue) {
+  return true;
+}
+
+const cellEditProp = {
+  mode: 'click',
+  blurToSave: true,
+  beforeSaveCell: onBeforeSaveCell, // a hook for before saving cell
+  afterSaveCell: onAfterSaveCell  // a hook for after saving cell
+};
 
 class Hello extends React.Component {
   render() {
@@ -54,7 +79,7 @@ class ComponentTable extends React.Component {
   }
 
   render() {
-    return <BootstrapTable data={this.state.components} striped hover search>
+    return <BootstrapTable data={this.state.components} striped hover cellEdit={ cellEditProp } insertRow={ true }>
         <TableHeaderColumn isKey dataField='component_id'>Component ID</TableHeaderColumn>
         <TableHeaderColumn dataField='type' dataSort filter={ { type: 'TextFilter', placeholder: 'Please enter a value' } }>Type</TableHeaderColumn>
         <TableHeaderColumn dataField='subtype'>Subtype</TableHeaderColumn>
