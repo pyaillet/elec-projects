@@ -18,18 +18,51 @@ function findAll() {
   });
 }
 
-function onAfterSaveCell(row, cellName, cellValue) {
+function updateComponent(component) {
   return request.post(urlServer+'/component')
-    .send({ component: row })
-    .set('Content-Type', 'application/json')
-    .end((err, res) => {
-      console.log(err);
-      console.log(res);
-    });
+      .send(component)
+      .set('Content-Type', 'application/json')
+      .end((err, res) => {
+        console.log(err);
+        console.log(res);
+      });
+};
+
+function onAfterSaveCell(row, cellName, cellValue) {
+  return updateComponent({ component: row });
 }
 
 function onBeforeSaveCell(row, cellName, cellValue) {
   return true;
+}
+
+function onAfterInsertRow(row) {
+  return updateComponent({ component: row });
+}
+
+function customConfirm(next, dropRowKeys) {
+  const dropRowKeysStr = dropRowKeys.join(',');
+  if (confirm(`(It's a custom confirm)Are you sure you want to delete ${dropRowKeysStr}?`)) {
+    // If the confirmation is true, call the function that
+    // continues the deletion of the record.
+    next();
+  }
+}
+
+function onAfterDeleteRow(rowKeys) {
+  Promise.all(rowKeys.map((rowKey) => {
+    return request.post(urlServer+'/component/delete')
+      .send({ id: rowKey })
+      .end((err, res) => {
+        console.log(err);
+        console.log(res);
+      })
+    })).then(() => {
+        console.log("Deleted.")
+      }).catch((err) => {
+        console.log(err);
+      })
+
 }
 
 const cellEditProp = {
@@ -37,6 +70,16 @@ const cellEditProp = {
   blurToSave: true,
   beforeSaveCell: onBeforeSaveCell, // a hook for before saving cell
   afterSaveCell: onAfterSaveCell  // a hook for after saving cell
+};
+
+const options = {
+  afterInsertRow: onAfterInsertRow,   // A hook for after insert rows
+  afterDeleteRow: onAfterDeleteRow,  // A hook for after droping rows.
+  handleConfirmDeleteRow: customConfirm
+};
+
+const selectRowProp = {
+  mode: 'checkbox'
 };
 
 class Hello extends React.Component {
@@ -59,7 +102,7 @@ class ComponentTable extends React.Component {
       .then(response => {
         let reworkedObj = response.body.map((obj) => {
           let newObj = obj;
-          if (obj.value != null) {
+          if (obj.value != null && obj.unit != null) {
             newObj.value = math.format(math.unit(obj.value+" "+obj.unit), 4);
           }
           return newObj;
@@ -79,7 +122,7 @@ class ComponentTable extends React.Component {
   }
 
   render() {
-    return <BootstrapTable data={this.state.components} striped hover cellEdit={ cellEditProp } insertRow={ true }>
+    return <BootstrapTable data={this.state.components} striped hover cellEdit={ cellEditProp } insertRow={ true } deleteRow={ true } selectRow={ selectRowProp } options={ options }>
         <TableHeaderColumn isKey dataField='component_id'>Component ID</TableHeaderColumn>
         <TableHeaderColumn dataField='type' dataSort filter={ { type: 'TextFilter', placeholder: 'Please enter a value' } }>Type</TableHeaderColumn>
         <TableHeaderColumn dataField='subtype'>Subtype</TableHeaderColumn>

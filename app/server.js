@@ -5,8 +5,17 @@ import ComponentRepository from './repositories/component-repository';
 import express from 'express';
 import bodyParser from 'body-parser';
 
+function ok(res) {
+  res.json({ result: 'ok' });
+}
+
+function ko(res) {
+  res.json({ result: 'ko' });
+}
+
 function myServer(db) {
   let app = express();
+  let componentRouter = express.Router();
   let componentRepository = new ComponentRepository(db);
 
   app.use(function(req, res, next) {
@@ -21,13 +30,25 @@ function myServer(db) {
     });
   });
   app.post('/component', (req, res) => {
+    console.log('%s %s %s', req.method, req.url, req.path);
     componentRepository.update(req.body.component)
-      .then(() => {
-        res.json({ result: 'ok' });
+      .then((component) => {
+        if (req.body.component.stock) {
+          componentRepository.setStock({id: component.component_id, stock: req.body.component.stock}).then(() => {
+            ok(res);
+          });
+        }
+        else {
+          ok(res);
+        }
       })
-      .catch(() => {
-        res.json({ result: 'ko' });
-      });
+      .catch(() => ko(res));
+  });
+  app.post('/component/delete', (req, res) => {
+    console.log('%s %s %s', req.method, req.url, req.path);
+    componentRepository.remove(req.body.id)
+      .then(() => ok(res))
+      .catch(() => ko(res));
   });
   app.listen(3000);
 }

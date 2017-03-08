@@ -1,6 +1,7 @@
 "use strict ";
 import Promise from 'bluebird';
 import db from 'sqlite';
+import json from 'json5';
 
 export default class ComponentRepository {
   constructor(db) {
@@ -120,41 +121,49 @@ export default class ComponentRepository {
   _update(component) {
     return this.db.run(`
       UPDATE component SET
-        type = ?,
-        model = ?,
-        value = ?,
-        unit = ?
-      WHERE component_id = ?
+        type = $type,
+        subtype = $subtype,
+        model = $model,
+        value = $value,
+        unit = $unit
+      WHERE component_id = $component_id
       `, {
-        1: component.type,
-        2: component.model,
-        3: component.value,
-        4: component.unit,
-        5: component.component_id
+        $type: component.type,
+        $subtype: component.subtype,
+        $model: component.model,
+        $value: component.value,
+        $unit: component.unit,
+        $component_id: component.component_id
       })
+    .then(() => {
+      return component;
+    })
     .catch(err => console.log("Error updating:", err));
   }
 
   _insert(component) {
+    console.log(component);
+    var newComponent = json.parse(json.stringify(component));
+    console.log(newComponent);
     return this.db.run(`
       INSERT INTO component (
         type,
+        subtype,
         model,
         value,
         unit)
-      VALUES (?, ?, ?, ?);
+      VALUES ($type, $subtype, $model, $value, $unit);
       `, {
-        1: component.type,
-        2: component.model,
-        3: component.value,
-        4: component.unit,
+        $type: component.type,
+        $subtype: component.subtype,
+        $model: component.model,
+        $value: component.value,
+        $unit: component.unit,
       })
-      .then(() => db.get("SELECT last_insert_rowid() as id;"))
-      .then((row) => ({
-        component_id: row.id,
-        type: component.type,
-        value: component.value,
-        unit: component.unit
+      .then(() => db.get("SELECT last_insert_rowid() as id;")
+        .then((row) => {
+          newComponent.component_id = row.component_id;
+          return newComponent;
       }))
       .catch(err => console.log("Error inserting:", err));
   }
